@@ -1,4 +1,4 @@
-from board import Board
+from board import Board, COLS
 from ai import AI
 
 
@@ -9,34 +9,46 @@ class Game:
         self.turn = "X"
 
     def run(self):
+        try:
+            self._play()
+        except (KeyboardInterrupt, EOFError):
+            print("\nGame quit.")
+
+    def _play(self):
         print("Connect Four — you are X.")
         while True:
             self.board.print()
             if self.turn == "X":
                 raw = input("Column (1-7), or q: ").strip().lower()
                 if raw == "q":
+                    print("Game quit.")
                     return
                 try:
                     col = int(raw) - 1
                 except ValueError:
-                    print("Enter a column number.")
+                    print("Not a number. Enter a column from 1 to 7, or q to quit.")
+                    continue
+                if not 0 <= col < COLS:
+                    print("Column must be between 1 and 7.")
+                    continue
+                if self.board.grid[0][col] != ".":
+                    print("That column is full. Choose another.")
                     continue
             else:
                 col = self.ai.choose_column(self.board)
-
-            if col is None or self.board.drop(col, self.turn) is None:
-                print("Column unavailable.")
-                if self.turn == "O":
+                if col is None or not 0 <= col < COLS or self.board.grid[0][col] != ".":
+                    print("AI could not make a legal move. Game over.")
                     return
-                continue
+
+            self.board.drop(col, self.turn)
 
             if self.board.winner(self.turn):
                 self.board.print()
-                print(self.turn, "wins!")
+                print(f"Game over: {self.turn} wins!")
                 return
             if self.board.full():
                 self.board.print()
-                print("Draw.")
+                print("Game over: draw.")
                 return
 
             self.turn = "O" if self.turn == "X" else "X"
