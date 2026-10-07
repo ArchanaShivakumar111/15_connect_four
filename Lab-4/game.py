@@ -41,6 +41,7 @@ class Game:
                     return
 
             self.board.drop(col, self.turn)
+            print(f"{self.turn} placed a disc in column {col + 1}.")
 
             if self.board.winner(self.turn):
                 self.board.print()
